@@ -16,6 +16,9 @@ variables:
   dotnetVersion: 10.0.x
   apiProject: RoyalVilla_API/RoyalVilla_API.csproj
   webProject: RoyalVillaWeb/RoyalVillaWeb.csproj
+  azureServiceConnection: RoyalVilla-Azure
+  apiAppName: royalvilla-api-dev
+  webAppName: royalvilla-web-dev
 
 stages:
   - stage: Build
@@ -86,3 +89,35 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/web
               artifact: web-drop
 
+  - stage: Deploy
+    displayName: Deploy to Azure App Service
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: DeployAPI
+        displayName: Deploy API
+        steps:
+          - download: current
+            artifact: api-drop
+
+          - task: AzureWebApp@1
+            displayName: Deploy API to App Service
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              appType: webApp
+              appName: $(apiAppName)
+              package: $(Pipeline.Workspace)/api-drop
+
+      - job: DeployWeb
+        displayName: Deploy Web
+        steps:
+          - download: current
+            artifact: web-drop
+
+          - task: AzureWebApp@1
+            displayName: Deploy Web to App Service
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              appType: webApp
+              appName: $(webAppName)
+              package: $(Pipeline.Workspace)/web-drop
