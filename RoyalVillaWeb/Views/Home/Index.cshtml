@@ -1,4 +1,4 @@
-﻿@using RoyalVilla.DTO
+@using RoyalVilla.DTO
 @model IEnumerable<VillaDTO>
 
 @{
@@ -112,16 +112,10 @@
                         <div class="card h-100 shadow-sm hover-shadow transition">
                             <!-- Villa Image -->
                             <div class="position-relative overflow-hidden">
-                                @if (!string.IsNullOrEmpty(villa.ImageUrl))
-                                {
-                                    <img src="@villa.ImageUrl" class="card-img-top villa-image" style="height: 250px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <div class="card-img-top bg-gradient-primary d-flex align-items-center justify-content-center" style="height: 250px;">
-                                        <i class="bi bi-image text-white" style="font-size: 4rem;"></i>
-                                    </div>
-                                }
+                                <img src="@SD.GetImageUrl(villa.ImageUrl)"
+                                     alt="@villa.Name"
+                                     class="card-img-top villa-image"
+                                     style="height: 250px; object-fit: cover;">
                                 <!-- Price Badge -->
                                 <div class="position-absolute top-0 end-0 m-3">
                                     <span class="badge bg-success fs-6 px-3 py-2 rounded-pill shadow">

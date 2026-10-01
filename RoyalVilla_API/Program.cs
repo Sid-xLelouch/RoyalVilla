@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -8,6 +9,7 @@ using RoyalVilla.DTO;
 using RoyalVilla_API.Data;
 using RoyalVilla_API.Models;
 using RoyalVilla_API.Services;
+using RoyalVilla_API.Services.IServices;
 using Scalar.AspNetCore;
 using System.Text;
 
@@ -15,6 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtSettings")["Secret"]);
 
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddAuthentication(option =>
 {
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -35,6 +39,8 @@ builder.Services.AddAuthentication(option =>
     };
 });
 
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
@@ -116,7 +122,7 @@ builder.Services.AddAutoMapper(o =>
     o.CreateMap<Villa, VillaUpdateDTO>().ReverseMap();
     o.CreateMap<Villa, VillaDTO>().ReverseMap();
     o.CreateMap<VillaUpdateDTO, VillaDTO>().ReverseMap();
-    o.CreateMap<User, UserDTO>().ReverseMap();
+    o.CreateMap<ApplicationUser, UserDTO>().ReverseMap();
     o.CreateMap<VillaAmenities, VillaAmenitiesCreateDTO>().ReverseMap();
     o.CreateMap<VillaAmenities, VillaAmenitiesUpdateDTO>().ReverseMap();
     o.CreateMap<VillaAmenities, VillaAmenitiesDTO>()
@@ -154,6 +160,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseStaticFiles();
 app.UseCors(o => o.AllowAnyOrigin().AllowAnyHeader().WithExposedHeaders("*"));
 app.UseHttpsRedirection();
 

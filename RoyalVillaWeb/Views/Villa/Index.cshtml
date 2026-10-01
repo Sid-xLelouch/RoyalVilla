@@ -1,4 +1,4 @@
-﻿@using RoyalVilla.DTO
+@using RoyalVilla.DTO
 @model IEnumerable<VillaDTO>
 
 @{
@@ -74,14 +74,14 @@
                                         <td>
                                             @if (!string.IsNullOrEmpty(villa.ImageUrl))
                                             {
-                                                <img src="@villa.ImageUrl" class="rounded" style="width: 60px; height: 45px; object-fit: cover;">
+                                               <img src="@SD.GetImageUrl(villa.ImageUrl)" class="rounded" style="width: 60px; height: 45px; object-fit: cover;">
                                             }
                                             else
                                             {
-                                                <div class="bg-secondary rounded d-flex align-items-center justify-content-center text-white"
-                                                     style="width: 60px; height: 45px;">
-                                                    <i class="bi bi-image"></i>
-                                                </div>
+                                                <img src="@SD.GetImageUrl(null)"
+                                                     alt="Placeholder image"
+                                                     class="rounded"
+                                                     style="width: 60px; height: 45px; object-fit: cover;">
                                             }
                                         </td>
                                         <td class="align-middle">

@@ -11,9 +11,10 @@
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
     <PackageReference Include="AutoMapper" Version="16.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -23,6 +24,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RoyalVilla.DTO\RoyalVilla.DTO.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

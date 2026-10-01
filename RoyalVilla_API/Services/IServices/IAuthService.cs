@@ -1,14 +1,16 @@
 ﻿using RoyalVilla.DTO;
 
-namespace RoyalVilla_API.Services
+namespace RoyalVilla_API.Services.IServices
 {
     public interface IAuthService
     {
         Task<UserDTO?> RegisterAsync(RegistrationRequestDTO registrationRequestDTO);
 
-        Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO loginRequestDTO);
+        Task<TokenDTO?> LoginAsync(LoginRequestDTO loginRequestDTO);
 
         Task<bool> IsEmailExistsAsync(string email);
+
+        Task<TokenDTO?> RefreshAccessTokenAsync(RefreshTokenRequestDTO refreshTokenRequestDTO);
 
     }
 }

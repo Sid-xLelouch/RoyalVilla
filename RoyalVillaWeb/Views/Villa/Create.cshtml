@@ -1,4 +1,4 @@
-﻿@model RoyalVilla.DTO.VillaCreateDTO
+@model RoyalVilla.DTO.VillaCreateDTO
 
 <div class="container my-4">
     <div class="row justify-content-center">
@@ -10,7 +10,7 @@
                     <span class="fw-semibold h4 pt-1">Create Villa</span>
                 </div>
                 <div class="card-body">
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         <!-- Villa Name -->
@@ -46,6 +46,7 @@
                                 <span asp-validation-for="Occupancy" class="text-danger small"></span>
                             </div>
                         </div>
+
                         <!-- Sqft -->
                         <div class="mb-3">
                             <label asp-for="Sqft"class="form-label">Square Feet</label>
@@ -53,11 +54,16 @@
                             <span asp-validation-for="Sqft" class="text-danger small"></span>
                         </div>
 
-                        <!-- Image URL -->
-                        <div class="mb-4">
-                            <label asp-for="ImageUrl" class="form-label">Image URL</label>
-                            <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
-                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label">Villa Image</label>
+                            <input asp-for="Image" class="form-control" accept="image/*" onchange="previewImage(this)"
+                                      placeholder="Describe the villa"/>
+                            <span asp-validation-for="Image" class="text-danger small"></span>
+                            <small class="form-text text-muted">Supported formats: JPG, JPEG, PNG (Max 5MB)</small>
+                        </div>
+
+                        <div id="imagePreview" class="mt-3" style="display:none">
+                            <img id="preview" class="img-thumbnail" style="max-width:300px;max-height:300px;"></img>
                         </div>
 
                         <!-- Action Buttons -->
@@ -76,4 +82,28 @@
 
 @section Scripts{
    <partial name="_ValidationScriptsPartial"  />
+   <script>
+       function previewImage(input){
+           const previewContainer = document.getElementById('imagePreview');
+           const preview = document.getElementById('preview');
+
+           if(input.files && input.files[0])
+           {
+               const reader = new FileReader();
+
+               reader.onload = function(e){
+                   preview.src = e.target.result;
+                   previewContainer.style.display='block';
+               }
+
+               reader.readAsDataURL(input.files[0]);
+           }
+           else
+           {
+               previewContainer.style.display='none';
+           }
+       }
+
+   </script>
 }
+

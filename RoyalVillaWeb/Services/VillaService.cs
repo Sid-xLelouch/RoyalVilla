@@ -1,4 +1,5 @@
-﻿using RoyalVilla.DTO;
+using RoyalVilla.DTO;
+using RoyalVillaWeb.Extension;
 using RoyalVillaWeb.Models;
 using RoyalVillaWeb.Services.IServices;
 using static RoyalVillaWeb.SD;
@@ -8,26 +9,20 @@ namespace RoyalVillaWeb.Services
 {
     public class VillaService : BaseService ,IVillaService
     {
-        private readonly string _apiEndpoint;
-        public VillaService(IHttpClientFactory httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
-            : base(httpClient, httpContextAccessor)
+        private const string APIEndpoint = $"api/{SD.CurrentAPIVersion}/villa";
+        public VillaService(IHttpClientFactory httpClient, IHttpContextAccessor httpContextAccessor,IConfiguration configuration, ITokenProvider tokenProvider)
+            : base(httpClient, tokenProvider, httpContextAccessor)
         {
-            var apiVersion = configuration.GetValue<string>("ServiceUrls:VillaApiVersion");
-            if (string.IsNullOrWhiteSpace(apiVersion))
-            {
-                apiVersion = "v1";
-            }
-
-            _apiEndpoint = $"/api/{apiVersion}/villa";
         }
 
         public Task<T?> CreateAsync<T>(VillaCreateDTO dto)
         {
+            var formData = dto.ToMultipartFormData();
             return SendAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.POST,
-                Data = dto,
-                Url = _apiEndpoint
+                Data = formData,
+                Url = APIEndpoint
             });
         }
 
@@ -36,7 +31,7 @@ namespace RoyalVillaWeb.Services
             return SendAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.DELETE,
-                Url = $"{_apiEndpoint}/{id}"
+                Url = $"{APIEndpoint}/{id}"
             });
         }
 
@@ -45,7 +40,7 @@ namespace RoyalVillaWeb.Services
             return SendAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.GET,
-                Url = _apiEndpoint
+                Url = $"{APIEndpoint}?pageSize=100"
             });
         }
 
@@ -54,18 +49,21 @@ namespace RoyalVillaWeb.Services
             return SendAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.GET,
-                Url = $"{_apiEndpoint}/{id}"
+                Url = $"{APIEndpoint}/{id}"
             });
         }
 
         public Task<T?> UpdateAsync<T>(VillaUpdateDTO dto)
         {
+            var formData = dto.ToMultipartFormData();
             return SendAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.PUT,
-                Data = dto,
-                Url = $"{_apiEndpoint}/{dto.Id}"
+                Data = formData,
+                Url = $"{APIEndpoint}/{dto.Id}"
             });
         }
     }
 }
+
+

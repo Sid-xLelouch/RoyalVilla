@@ -1,4 +1,4 @@
-﻿@model RoyalVilla.DTO.VillaDTO
+@model RoyalVilla.DTO.VillaDTO
 
 <div class="container my-4">
     <div class="row justify-content-center">
@@ -11,6 +11,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="Id" />
                         <!-- Villa Name -->
                         <div class="mb-3">
@@ -76,3 +77,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+

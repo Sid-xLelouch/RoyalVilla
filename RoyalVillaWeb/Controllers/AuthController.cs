@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +17,13 @@ namespace RoyalVillaWeb.Controllers
 
         private readonly IAuthService _authService;
         private readonly IMapper _mapper;
+        private readonly ITokenProvider _tokenProvider;
 
-        public AuthController(IAuthService authService, IMapper mapper)
+        public AuthController(IAuthService authService, IMapper mapper, ITokenProvider tokenProvider)
         {
             _mapper = mapper;
             _authService = authService;
+            _tokenProvider = tokenProvider;
         }
 
         [HttpGet]
@@ -34,46 +36,32 @@ namespace RoyalVillaWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginRequestDTO loginRequestDTO)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(loginRequestDTO);
-            }
-
             try
             {
-                var response = await _authService.LoginAsync<ApiResponse<LoginResponseDTO>>(loginRequestDTO);
+                var response = await _authService.LoginAsync<ApiResponse<TokenDTO>>(loginRequestDTO);
                 if (response != null && response.Success && response.Data != null)
                 {
-                    LoginResponseDTO model = response.Data;
-
-                    if (model.UserDTO == null)
+                    var principal = _tokenProvider.CreatePrincipalFromJwtToken(response.Data.AccessToken);
+                    if (principal != null)
                     {
-                        TempData["error"] = "Login failed. The server did not return user information.";
-                        return View(loginRequestDTO);
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                        _tokenProvider.SetToken(response.Data.AccessToken, response.Data.RefreshToken);
+                        return RedirectToAction("Index", "Home");
                     }
-
-                    var claims = new List<Claim>
+                    else
                     {
-                        new Claim(ClaimTypes.NameIdentifier, model.UserDTO.Id.ToString()),
-                        new Claim(ClaimTypes.Name, model.UserDTO.Name),
-                        new Claim(ClaimTypes.Email, model.UserDTO.Email),
-                        new Claim(ClaimTypes.Role, model.UserDTO.Role)
-                    };
-
-                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var principal = new ClaimsPrincipal(identity);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-                    HttpContext.Session.SetString(SD.SessionToken, model.Token);
-                    return RedirectToAction("Index", "Home");
+                        TempData["error"] = "Invalid Token received. Please try again";
+                    }
                 }
-
-                TempData["error"] = response?.Message ?? "Login failed. Please try again.";
+                else
+                {
+                    TempData["error"] = response.Message;
+                }
             }
             catch (Exception ex)
             {
                 TempData["error"] = $"An error occurred: {ex.Message}";
             }
-
             return View(loginRequestDTO);
         }
 
@@ -132,3 +120,4 @@ namespace RoyalVillaWeb.Controllers
         }
     }
 }
+

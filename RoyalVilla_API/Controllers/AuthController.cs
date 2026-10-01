@@ -2,7 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using RoyalVilla.DTO;
-using RoyalVilla_API.Services;
+using RoyalVilla_API.Services.IServices;
 
 namespace RoyalVilla_API.Controllers
 {
@@ -56,7 +56,7 @@ namespace RoyalVilla_API.Controllers
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<LoginRequestDTO>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse<LoginResponseDTO>>> Login([FromBody] LoginRequestDTO loginRequestDTO)
+        public async Task<ActionResult<ApiResponse<TokenDTO>>> Login([FromBody] LoginRequestDTO loginRequestDTO)
         {
             try
             {
@@ -69,17 +69,55 @@ namespace RoyalVilla_API.Controllers
 
                 if (loginResponse == null)
                 {
-                    return BadRequest(ApiResponse<object>.BadRequest("Login failed"));
+                    return BadRequest(ApiResponse<object>.BadRequest("Login failed. Please check your credentials."));
                 }
 
                 // auth service 
-                var response = ApiResponse<LoginResponseDTO>.Ok(loginResponse, "Login successful");
+                var response = ApiResponse<TokenDTO>.Ok(loginResponse, "Login successful");
                 return Ok(response);
             }
 
             catch (Exception ex)
             {
                 var errorResponse = ApiResponse<object>.Error(500, "An error occured during login", ex.Message);
+                return StatusCode(500, errorResponse);
+            }
+        }
+
+
+        [HttpPost("refresh-token")]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<UserDTO>>> RefreshAccessToken([FromBody] RefreshTokenRequestDTO refreshTokenRequestDTO)
+        {
+            try
+            {
+                if (refreshTokenRequestDTO == null || String.IsNullOrEmpty(refreshTokenRequestDTO.RefreshToken))
+                {
+                    return BadRequest(ApiResponse<object>.BadRequest("Refresh Token is required"));
+                }
+
+                var tokenResponse = await _authService.RefreshAccessTokenAsync(refreshTokenRequestDTO);
+
+                if (tokenResponse == null)
+                {
+                    // Token reuse or invalid token - log for security monitoring
+                    var errorResponse = ApiResponse<object>.Error(401, "Invalid or expired refresh token. If token reuse was detected" +
+                        ", all your sessions have been terminated");
+
+                    return Unauthorized(errorResponse);
+                }
+
+                // auth service 
+                var response = ApiResponse<TokenDTO>.Ok(tokenResponse, "Token refreshed successfully");
+                return Ok(response);
+            }
+
+            catch (Exception ex)
+            {
+                var errorResponse = ApiResponse<object>.Error(500, "An error occured during token refresh", ex.Message);
                 return StatusCode(500, errorResponse);
             }
         }

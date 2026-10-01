@@ -1,4 +1,4 @@
-﻿namespace RoyalVillaWeb
+namespace RoyalVillaWeb
 {
     public static class SD
     {
@@ -10,6 +10,24 @@
             DELETE
         }
 
-        public const string SessionToken = "JWTToken";
+        public const string SessionAccessToken = "JWTToken";
+        public const string SessionRefreshToken = "RefreshToken";
+        public const string CurrentAPIVersion = "v2";
+
+        public static string APIBaseUrl { get; set; }
+
+        public static string GetImageUrl (string? imageUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl))
+            {
+                return $"{APIBaseUrl}/images/placeholder-villa.jpg";
+            }
+            if (imageUrl.StartsWith("http"))
+            {
+                return imageUrl;
+            }
+            return $"{APIBaseUrl}{imageUrl}";
+        } 
     }
 }
+
